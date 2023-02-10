@@ -11,11 +11,13 @@ provider "azurerm" {
 }
 
 locals {
-  location      = "West Europe"
-  location_name = lower(replace(local.location, "/\\s+/", ""))
+  app            = "app"
+  location       = "West Europe"
+  location_lower = lower(replace(local.location, "/\\s+/", ""))
 }
 
-resource "azurerm_resource_group" "aks" {
-  name     = "rg-${var.environment}-aks-${local.location_name}"
+# Create the resource group for the application.
+resource "azurerm_resource_group" "default" {
+  name     = "rg-${var.environment}-app-${local.location_lower}"
   location = local.location
 }
