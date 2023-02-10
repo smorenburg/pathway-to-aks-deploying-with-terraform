@@ -1,7 +1,7 @@
 # Create the Kubernetes cluster, including the default node pool.
 resource "azurerm_kubernetes_cluster" "default" {
   name                 = "aks-${local.name_suffix}"
-  location             = local.location
+  location             = var.location
   resource_group_name  = azurerm_resource_group.default.name
   node_resource_group  = "${azurerm_resource_group.default.name}-aks-nodes"
   dns_prefix           = "aks-${local.name_suffix}"
