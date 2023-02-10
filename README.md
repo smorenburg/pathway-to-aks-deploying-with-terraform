@@ -1,1 +1,1 @@
-# pathway-to-aks-series-deploying-with-terraform
+# Pathway to AKS: Deploying with Terraform
