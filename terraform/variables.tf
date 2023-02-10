@@ -1,11 +1,11 @@
 variable "location" {
+  description = "The location (region) for the resources."
   type        = string
-  description = "The location for the resources."
   default     = "westeurope"
 }
 
 variable "environment" {
-  type        = string
   description = "The environment for the resources."
+  type        = string
   default     = "dev"
 }
