@@ -12,7 +12,7 @@ provider "azurerm" {
 
 locals {
   app            = "app"
-  name_suffix    = "${var.environment}-${local.app}-${var.location}"
+  name_suffix    = "${local.app}-${var.environment}-${var.location}"
 }
 
 # Create the resource group for the application.
