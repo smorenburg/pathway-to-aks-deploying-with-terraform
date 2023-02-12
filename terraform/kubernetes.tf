@@ -1,18 +1,18 @@
 # Create the managed identity for the cluster.
 resource "azurerm_user_assigned_identity" "aks" {
-  name                = "mi-aks-cluster-${local.name_suffix}"
+  name                = "mi-aks-${local.name_suffix}"
   location            = var.location
   resource_group_name = azurerm_resource_group.default.name
 }
 
 # Create the cluster, including the default node pool.
 resource "azurerm_kubernetes_cluster" "default" {
-  name                 = "aks-cluster-${local.name_suffix}"
-  location             = var.location
-  resource_group_name  = azurerm_resource_group.default.name
-  node_resource_group  = "${azurerm_resource_group.default.name}-aks-nodes"
-  dns_prefix           = "aks-cluster-${local.name_suffix}"
-  azure_policy_enabled = true
+  name                            = "aks-${local.name_suffix}"
+  location                        = var.location
+  resource_group_name             = azurerm_resource_group.default.name
+  node_resource_group             = "${azurerm_resource_group.default.name}-aks"
+  dns_prefix                      = "aks-${local.name_suffix}"
+  azure_policy_enabled            = true
 
   default_node_pool {
     name                = "default"
@@ -22,11 +22,27 @@ resource "azurerm_kubernetes_cluster" "default" {
     enable_auto_scaling = true
     min_count           = 3
     max_count           = 6
+
+    upgrade_settings {
+      max_surge = "25%"
+    }
   }
 
   identity {
     type         = "UserAssigned"
     identity_ids = [azurerm_user_assigned_identity.aks.id]
+  }
+
+  api_server_access_profile {
+    authorized_ip_ranges = local.authorized_ip_ranges
+  }
+
+  oms_agent {
+    log_analytics_workspace_id = azurerm_log_analytics_workspace.default.id
+  }
+
+  microsoft_defender {
+    log_analytics_workspace_id = azurerm_log_analytics_workspace.default.id
   }
 
   depends_on = [
