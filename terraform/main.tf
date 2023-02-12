@@ -14,9 +14,8 @@ provider "azurerm" {
   }
 }
 
-
 locals {
-  app                  = "app"
+  app                  = "arceus"
   name_suffix          = "${local.app}-${var.environment}-${var.location}"
   authorized_ip_ranges = ["77.169.37.43/32"]
 }
