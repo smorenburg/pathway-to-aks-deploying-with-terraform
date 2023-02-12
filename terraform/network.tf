@@ -23,7 +23,7 @@ resource "azurerm_network_security_group" "aks" {
 
 # Create the route table.
 resource "azurerm_route_table" "aks" {
-  name                = "route-vnet-aks"
+  name                = "rt-vnet-aks"
   location            = var.location
   resource_group_name = azurerm_resource_group.default.name
 }
@@ -40,14 +40,13 @@ resource "azurerm_subnet_route_table_association" "aks" {
   route_table_id = azurerm_route_table.aks.id
 }
 
-# Assign the 'Network Contributor' role for the managed identity to the subnet.
+# Assign the 'Network Contributor' role for the managed identity to the subnet and route table.
 resource "azurerm_role_assignment" "subnet" {
   scope                = azurerm_subnet.aks.id
   role_definition_name = "Network Contributor"
   principal_id         = azurerm_user_assigned_identity.aks.principal_id
 }
 
-# Assign the 'Network Contributor' role for the managed identity to the route table.
 resource "azurerm_role_assignment" "route_table" {
   scope                = azurerm_route_table.aks.id
   role_definition_name = "Network Contributor"
