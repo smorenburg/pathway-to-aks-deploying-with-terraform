@@ -33,3 +33,10 @@ resource "azurerm_log_analytics_workspace" "default" {
   resource_group_name = azurerm_resource_group.default.name
   retention_in_days   = 30
 }
+
+# Create the managed identity for the cluster.
+resource "azurerm_user_assigned_identity" "aks" {
+  name                = "id-aks-${local.name_suffix}"
+  location            = var.location
+  resource_group_name = azurerm_resource_group.default.name
+}

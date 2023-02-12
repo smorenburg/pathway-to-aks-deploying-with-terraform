@@ -1,10 +1,3 @@
-# Create the managed identity for the cluster.
-resource "azurerm_user_assigned_identity" "aks" {
-  name                = "mi-aks-${local.name_suffix}"
-  location            = var.location
-  resource_group_name = azurerm_resource_group.default.name
-}
-
 # Create the cluster, including the default node pool.
 resource "azurerm_kubernetes_cluster" "default" {
   name                            = "aks-${local.name_suffix}"
