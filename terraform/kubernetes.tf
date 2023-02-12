@@ -34,10 +34,6 @@ resource "azurerm_kubernetes_cluster" "default" {
     log_analytics_workspace_id = azurerm_log_analytics_workspace.default.id
   }
 
-  microsoft_defender {
-    log_analytics_workspace_id = azurerm_log_analytics_workspace.default.id
-  }
-
   depends_on = [
     azurerm_role_assignment.subnet,
     azurerm_role_assignment.route_table
