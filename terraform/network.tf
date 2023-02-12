@@ -40,14 +40,14 @@ resource "azurerm_subnet_route_table_association" "aks" {
   route_table_id = azurerm_route_table.aks.id
 }
 
-# Assign the 'Network Contributor' role to the managed identity for the subnet.
+# Assign the 'Network Contributor' role for the managed identity to the subnet.
 resource "azurerm_role_assignment" "subnet" {
   scope                = azurerm_subnet.aks.id
   role_definition_name = "Network Contributor"
   principal_id         = azurerm_user_assigned_identity.aks.principal_id
 }
 
-# Assign the 'Network Contributor' role to the managed identity for the route table.
+# Assign the 'Network Contributor' role for the managed identity to the route table.
 resource "azurerm_role_assignment" "route_table" {
   scope                = azurerm_route_table.aks.id
   role_definition_name = "Network Contributor"

@@ -15,7 +15,7 @@ locals {
   name_suffix    = "${local.app}-${var.environment}-${var.location}"
 }
 
-# Create the resource group for the application.
+# Create the resource group..
 resource "azurerm_resource_group" "default" {
   name     = "rg-${local.name_suffix}"
   location = var.location
