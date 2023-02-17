@@ -3,6 +3,10 @@ terraform {
     azurerm = {
       version = ">= 3.43"
     }
+    random = {
+      source  = "hashicorp/random"
+      version = ">= 3.4"
+    }
   }
 }
 
@@ -20,6 +24,11 @@ locals {
   authorized_ip_ranges = ["77.169.37.43/32"]
 }
 
+# Generate a random suffix for the storage account.
+resource "random_id" "suffix" {
+  byte_length = 4
+}
+
 # Create the resource group.
 resource "azurerm_resource_group" "default" {
   name     = "rg-${local.name_suffix}"
@@ -32,6 +41,15 @@ resource "azurerm_log_analytics_workspace" "default" {
   location            = var.location
   resource_group_name = azurerm_resource_group.default.name
   retention_in_days   = 30
+}
+
+# Create the storage account for the kube-audit logs.
+resource "azurerm_storage_account" "kube_audit_logs" {
+  name                     = "st${local.app}${random_id.suffix.hex}"
+  location                 = var.location
+  resource_group_name      = azurerm_resource_group.default.name
+  account_tier             = "Standard"
+  account_replication_type = "LRS"
 }
 
 # Create the managed identity for the cluster.
