@@ -40,7 +40,7 @@ resource "azurerm_kubernetes_cluster" "default" {
   ]
 }
 
-# Collect the diagnostic categories for the Kubernetes cluster.
+# Collect the diagnostic categories of the Kubernetes cluster.
 data "azurerm_monitor_diagnostic_categories" "kubernetes_cluster" {
   resource_id = azurerm_kubernetes_cluster.default.id
 }
