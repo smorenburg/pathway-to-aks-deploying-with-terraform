@@ -22,7 +22,7 @@ locals {
   # Set the application name
   app = "arceus"
 
-  # Contruct the name suffix.
+  # Set the name suffix.
   name_suffix = "${local.app}-${var.environment}-${var.location}"
 
   # Set the authorized IP ranges for the Kubernetes cluster.
