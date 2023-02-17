@@ -19,13 +19,18 @@ provider "azurerm" {
 }
 
 locals {
-  app                  = "arceus"
-  name_suffix          = "${local.app}-${var.environment}-${var.location}"
+  # Set the application name
+  app = "arceus"
+
+  # Contruct the name suffix.
+  name_suffix = "${local.app}-${var.environment}-${var.location}"
+
+  # Set the authorized IP ranges for the Kubernetes cluster.
   authorized_ip_ranges = ["77.169.37.43/32"]
 }
 
-# Generate a random suffix for the storage account.
-resource "random_id" "suffix" {
+# Generate a random suffix for the kube-audit logs storage account.
+resource "random_id" "kube_audit_logs" {
   byte_length = 4
 }
 
@@ -45,14 +50,14 @@ resource "azurerm_log_analytics_workspace" "default" {
 
 # Create the storage account for the kube-audit logs.
 resource "azurerm_storage_account" "kube_audit_logs" {
-  name                     = "st${local.app}${random_id.suffix.hex}"
+  name                     = "st${local.app}${random_id.kube_audit_logs.hex}"
   location                 = var.location
   resource_group_name      = azurerm_resource_group.default.name
   account_tier             = "Standard"
   account_replication_type = "LRS"
 }
 
-# Create the managed identity for the cluster.
+# Create the managed identity for the Kubernetes cluster.
 resource "azurerm_user_assigned_identity" "aks" {
   name                = "id-aks-${local.name_suffix}"
   location            = var.location

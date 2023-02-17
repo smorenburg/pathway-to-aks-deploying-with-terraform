@@ -1,4 +1,4 @@
-# Create the cluster, including the default node pool.
+# Create the Kubernetes cluster, including the default node pool.
 resource "azurerm_kubernetes_cluster" "default" {
   name                 = "aks-${local.name_suffix}"
   location             = var.location
@@ -47,7 +47,10 @@ data "azurerm_monitor_diagnostic_categories" "kubernetes_cluster" {
 
 #
 locals {
-  log_categories    = data.azurerm_monitor_diagnostic_categories.kubernetes_cluster.log_category_types
+  # Set the log categories and exclude the kube-audit logs from the log categories.
+  log_categories = toset([for type in data.azurerm_monitor_diagnostic_categories.kubernetes_cluster.log_category_types : type if type != "kube-audit"])
+
+  # Set the metric categories.
   metric_categories = data.azurerm_monitor_diagnostic_categories.kubernetes_cluster.metrics
 }
 
@@ -58,7 +61,7 @@ resource "azurerm_monitor_diagnostic_setting" "default" {
   log_analytics_workspace_id = azurerm_log_analytics_workspace.default.id
 
   dynamic "enabled_log" {
-    for_each = { for category in local.log_categories : category => category if category != "kube-audit" }
+    for_each = local.log_categories
 
     content {
       category = enabled_log.key
@@ -83,6 +86,11 @@ resource "azurerm_monitor_diagnostic_setting" "kube_audit" {
 
   enabled_log {
     category = "kube-audit"
+
+    retention_policy {
+      enabled = true
+      days    = 30
+    }
   }
 
   dynamic "metric" {
