@@ -45,7 +45,6 @@ data "azurerm_monitor_diagnostic_categories" "kubernetes_cluster" {
   resource_id = azurerm_kubernetes_cluster.default.id
 }
 
-#
 locals {
   # Set the log categories and exclude the kube-audit logs from the log categories.
   log_categories = toset([for type in data.azurerm_monitor_diagnostic_categories.kubernetes_cluster.log_category_types : type if type != "kube-audit"])
