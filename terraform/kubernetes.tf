@@ -51,7 +51,7 @@ locals {
   metric_categories = data.azurerm_monitor_diagnostic_categories.kubernetes_cluster.metrics
 }
 
-# Create the default diagnostic settings, excluding the kube-audit logs.
+# Create the default diagnostic setting, excluding the kube-audit logs.
 resource "azurerm_monitor_diagnostic_setting" "default" {
   name                       = "default"
   target_resource_id         = azurerm_kubernetes_cluster.default.id
