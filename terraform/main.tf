@@ -18,6 +18,8 @@ provider "azurerm" {
   }
 }
 
+data "azurerm_subscription" "current" {}
+
 locals {
   # Set the application name
   app = "arceus"
@@ -58,7 +60,7 @@ resource "azurerm_storage_account" "kube_audit_logs" {
 }
 
 # Create the managed identity for the Kubernetes cluster.
-resource "azurerm_user_assigned_identity" "aks" {
+resource "azurerm_user_assigned_identity" "kubernetes_cluster" {
   name                = "id-aks-${local.name_suffix}"
   location            = var.location
   resource_group_name = azurerm_resource_group.default.name

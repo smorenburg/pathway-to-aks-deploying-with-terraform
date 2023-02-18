@@ -5,7 +5,6 @@ resource "azurerm_kubernetes_cluster" "default" {
   resource_group_name  = azurerm_resource_group.default.name
   node_resource_group  = "${azurerm_resource_group.default.name}-aks"
   dns_prefix           = "aks-${local.name_suffix}"
-  azure_policy_enabled = true
 
   default_node_pool {
     name                = "default"
@@ -23,7 +22,7 @@ resource "azurerm_kubernetes_cluster" "default" {
 
   identity {
     type         = "UserAssigned"
-    identity_ids = [azurerm_user_assigned_identity.aks.id]
+    identity_ids = [azurerm_user_assigned_identity.kubernetes_cluster.id]
   }
 
   api_server_access_profile {

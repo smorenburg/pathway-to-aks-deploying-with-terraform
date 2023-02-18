@@ -44,11 +44,11 @@ resource "azurerm_subnet_route_table_association" "aks" {
 resource "azurerm_role_assignment" "subnet" {
   scope                = azurerm_subnet.aks.id
   role_definition_name = "Network Contributor"
-  principal_id         = azurerm_user_assigned_identity.aks.principal_id
+  principal_id         = azurerm_user_assigned_identity.kubernetes_cluster.principal_id
 }
 
 resource "azurerm_role_assignment" "route_table" {
   scope                = azurerm_route_table.aks.id
   role_definition_name = "Network Contributor"
-  principal_id         = azurerm_user_assigned_identity.aks.principal_id
+  principal_id         = azurerm_user_assigned_identity.kubernetes_cluster.principal_id
 }
