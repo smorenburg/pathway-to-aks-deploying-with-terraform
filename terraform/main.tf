@@ -7,6 +7,10 @@ terraform {
       source  = "hashicorp/random"
       version = ">= 3.4"
     }
+    http = {
+      source  = "hashicorp/http"
+      version = ">= 3.2"
+    }
   }
 }
 
@@ -20,6 +24,11 @@ provider "azurerm" {
 
 data "azurerm_client_config" "current" {}
 
+# Get the public IP address
+data "http" "public_ip" {
+  url = "https://ifconfig.co/ip"
+}
+
 locals {
   # Set the application name
   app = "arceus"
@@ -27,8 +36,11 @@ locals {
   # Set the name suffix.
   name_suffix = "${local.app}-${var.environment}-${var.location}"
 
+  # Clean and set the public IP address
+  public_ip = chomp(data.http.public_ip.response_body)
+
   # Set the authorized IP ranges for the Kubernetes cluster.
-  authorized_ip_ranges = ["77.169.37.43/32"]
+  authorized_ip_ranges = ["${local.public_ip}/32"]
 }
 
 # Generate a random suffix for the kube-audit logs storage account.
@@ -150,10 +162,11 @@ resource "azurerm_key_vault_key" "disk_encryption_set" {
 
 # Create the disk encryption set.
 resource "azurerm_disk_encryption_set" "default" {
-  name                = "des-${local.name_suffix}"
-  location            = var.location
-  resource_group_name = azurerm_resource_group.default.name
-  key_vault_key_id    = azurerm_key_vault_key.disk_encryption_set.id
+  name                      = "des-${local.name_suffix}"
+  location                  = var.location
+  resource_group_name       = azurerm_resource_group.default.name
+  key_vault_key_id          = azurerm_key_vault_key.disk_encryption_set.id
+  auto_key_rotation_enabled = true
 
   identity {
     type         = "UserAssigned"
