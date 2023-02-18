@@ -5,10 +5,11 @@ resource "azurerm_kubernetes_cluster" "default" {
   resource_group_name  = azurerm_resource_group.default.name
   node_resource_group  = "${azurerm_resource_group.default.name}-aks"
   dns_prefix           = "aks-${local.name_suffix}"
+  azure_policy_enabled = true
 
   default_node_pool {
     name                = "default"
-    vm_size             = "Standard_D2_v5"
+    vm_size             = "Standard_D2s_v5"
     vnet_subnet_id      = azurerm_subnet.aks.id
     zones               = ["1", "2", "3"]
     enable_auto_scaling = true
@@ -30,6 +31,10 @@ resource "azurerm_kubernetes_cluster" "default" {
   }
 
   oms_agent {
+    log_analytics_workspace_id = azurerm_log_analytics_workspace.default.id
+  }
+
+  microsoft_defender {
     log_analytics_workspace_id = azurerm_log_analytics_workspace.default.id
   }
 
