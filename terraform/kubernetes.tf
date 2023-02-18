@@ -45,28 +45,28 @@ resource "azurerm_kubernetes_cluster" "default" {
   ]
 }
 
-# Collect the diagnostic categories of the Kubernetes cluster.
+# Collect the diagnostic categories.
 data "azurerm_monitor_diagnostic_categories" "kubernetes_cluster" {
   resource_id = azurerm_kubernetes_cluster.default.id
 }
 
 locals {
   # Set the log categories, excluding the kube-audit logs.
-  log_categories = toset([for type in data.azurerm_monitor_diagnostic_categories.kubernetes_cluster.log_category_types : type if type != "kube-audit"])
+  kubernetes_cluster_log_categories = toset([for type in data.azurerm_monitor_diagnostic_categories.kubernetes_cluster.log_category_types : type if type != "kube-audit"])
 
   # Set the metric categories.
-  metric_categories = data.azurerm_monitor_diagnostic_categories.kubernetes_cluster.metrics
+  kubernetes_cluster_metric_categories = data.azurerm_monitor_diagnostic_categories.kubernetes_cluster.metrics
 }
 
 # Create the default diagnostic setting, excluding the kube-audit logs.
-resource "azurerm_monitor_diagnostic_setting" "default" {
+resource "azurerm_monitor_diagnostic_setting" "kubernetes_cluster_default" {
   name                           = "default"
   target_resource_id             = azurerm_kubernetes_cluster.default.id
   log_analytics_workspace_id     = azurerm_log_analytics_workspace.default.id
   log_analytics_destination_type = "Dedicated"
 
   dynamic "enabled_log" {
-    for_each = local.log_categories
+    for_each = local.kubernetes_cluster_log_categories
 
     content {
       category = enabled_log.key
@@ -74,7 +74,7 @@ resource "azurerm_monitor_diagnostic_setting" "default" {
   }
 
   dynamic "metric" {
-    for_each = local.metric_categories
+    for_each = local.kubernetes_cluster_metric_categories
 
     content {
       category = metric.key
@@ -84,10 +84,10 @@ resource "azurerm_monitor_diagnostic_setting" "default" {
 }
 
 # Create the kube-audit diagnostic setting.
-resource "azurerm_monitor_diagnostic_setting" "kube_audit" {
+resource "azurerm_monitor_diagnostic_setting" "kubernetes_cluster_kube_audit" {
   name               = "kube-audit"
   target_resource_id = azurerm_kubernetes_cluster.default.id
-  storage_account_id = azurerm_storage_account.kube_audit_logs.id
+  storage_account_id = azurerm_storage_account.logs.id
 
   enabled_log {
     category = "kube-audit"
@@ -99,7 +99,7 @@ resource "azurerm_monitor_diagnostic_setting" "kube_audit" {
   }
 
   dynamic "metric" {
-    for_each = local.metric_categories
+    for_each = local.kubernetes_cluster_metric_categories
 
     content {
       category = metric.key

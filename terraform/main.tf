@@ -33,7 +33,7 @@ locals {
   # Set the application name
   app = "arceus"
 
-  # Set the name suffix.
+  # Construct the name suffix.
   name_suffix = "${local.app}-${var.environment}-${var.location}"
 
   # Clean and set the public IP address
@@ -43,8 +43,8 @@ locals {
   authorized_ip_ranges = ["${local.public_ip}/32"]
 }
 
-# Generate a random suffix for the kube-audit logs storage account.
-resource "random_id" "kube_audit_logs" {
+# Generate a random suffix for the logs storage account.
+resource "random_id" "logs" {
   byte_length = 4
 }
 
@@ -62,9 +62,9 @@ resource "azurerm_log_analytics_workspace" "default" {
   retention_in_days   = 30
 }
 
-# Create the storage account for the kube-audit logs.
-resource "azurerm_storage_account" "kube_audit_logs" {
-  name                     = "st${local.app}${random_id.kube_audit_logs.hex}"
+# Create the storage account for the logs.
+resource "azurerm_storage_account" "logs" {
+  name                     = "st${local.app}${random_id.logs.hex}"
   location                 = var.location
   resource_group_name      = azurerm_resource_group.default.name
   account_tier             = "Standard"
@@ -83,81 +83,6 @@ resource "azurerm_user_assigned_identity" "disk_encryption_set" {
   name                = "id-des-${local.name_suffix}"
   location            = var.location
   resource_group_name = azurerm_resource_group.default.name
-}
-
-# Create the key vault.
-resource "azurerm_key_vault" "default" {
-  name                        = "kv-${local.name_suffix}"
-  location                    = var.location
-  resource_group_name         = azurerm_resource_group.default.name
-  tenant_id                   = data.azurerm_client_config.current.tenant_id
-  sku_name                    = "premium"
-  enabled_for_disk_encryption = true
-  purge_protection_enabled    = true
-}
-
-# Create the key vault policy for the current user.
-resource "azurerm_key_vault_access_policy" "default" {
-  key_vault_id = azurerm_key_vault.default.id
-  tenant_id    = data.azurerm_client_config.current.tenant_id
-  object_id    = data.azurerm_client_config.current.object_id
-
-  key_permissions = [
-    "Create",
-    "Delete",
-    "Get",
-    "Purge",
-    "Recover",
-    "Update",
-    "List",
-    "Decrypt",
-    "Sign",
-    "WrapKey",
-    "UnwrapKey"
-  ]
-}
-
-# Create the key vault access policy for the disk encryption set managed identity.
-resource "azurerm_key_vault_access_policy" "disk_encryption_set" {
-  key_vault_id = azurerm_key_vault.default.id
-  tenant_id    = data.azurerm_client_config.current.tenant_id
-  object_id    = azurerm_user_assigned_identity.disk_encryption_set.principal_id
-
-  key_permissions = [
-    "Create",
-    "Delete",
-    "Get",
-    "Purge",
-    "Recover",
-    "Update",
-    "List",
-    "Decrypt",
-    "Sign",
-    "WrapKey",
-    "UnwrapKey"
-  ]
-}
-
-# Create the key for the disk encryption set.
-resource "azurerm_key_vault_key" "disk_encryption_set" {
-  name         = "disk-encryption-set"
-  key_vault_id = azurerm_key_vault.default.id
-  key_type     = "RSA-HSM"
-  key_size     = 2048
-
-  key_opts = [
-    "decrypt",
-    "encrypt",
-    "sign",
-    "unwrapKey",
-    "verify",
-    "wrapKey",
-  ]
-
-  depends_on = [
-    azurerm_key_vault_access_policy.disk_encryption_set,
-    azurerm_key_vault_access_policy.default
-  ]
 }
 
 # Create the disk encryption set.
