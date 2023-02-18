@@ -1,11 +1,12 @@
 # Create the Kubernetes cluster, including the default node pool.
 resource "azurerm_kubernetes_cluster" "default" {
-  name                 = "aks-${local.name_suffix}"
-  location             = var.location
-  resource_group_name  = azurerm_resource_group.default.name
-  node_resource_group  = "${azurerm_resource_group.default.name}-aks"
-  dns_prefix           = "aks-${local.name_suffix}"
-  azure_policy_enabled = true
+  name                   = "aks-${local.name_suffix}"
+  location               = var.location
+  resource_group_name    = azurerm_resource_group.default.name
+  node_resource_group    = "${azurerm_resource_group.default.name}-aks"
+  dns_prefix             = "aks-${local.name_suffix}"
+  azure_policy_enabled   = true
+  disk_encryption_set_id = azurerm_disk_encryption_set.default.id
 
   default_node_pool {
     name                = "default"
@@ -59,9 +60,10 @@ locals {
 
 # Create the default diagnostic setting, excluding the kube-audit logs.
 resource "azurerm_monitor_diagnostic_setting" "default" {
-  name                       = "default"
-  target_resource_id         = azurerm_kubernetes_cluster.default.id
-  log_analytics_workspace_id = azurerm_log_analytics_workspace.default.id
+  name                           = "default"
+  target_resource_id             = azurerm_kubernetes_cluster.default.id
+  log_analytics_workspace_id     = azurerm_log_analytics_workspace.default.id
+  log_analytics_destination_type = "Dedicated"
 
   dynamic "enabled_log" {
     for_each = local.log_categories
