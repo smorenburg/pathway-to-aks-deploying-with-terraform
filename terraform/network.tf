@@ -16,14 +16,14 @@ resource "azurerm_subnet" "aks" {
 
 # Create the network security group.
 resource "azurerm_network_security_group" "aks" {
-  name                = "nsg-vnet-aks-${local.suffix}"
+  name                = "nsg-aks-vnet"
   location            = var.location
   resource_group_name = azurerm_resource_group.default.name
 }
 
 # Create the route table.
 resource "azurerm_route_table" "aks" {
-  name                = "rt-vnet-aks-${local.suffix}"
+  name                = "rt-aks-vnet"
   location            = var.location
   resource_group_name = azurerm_resource_group.default.name
 }

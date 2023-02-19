@@ -81,6 +81,9 @@ data "azurerm_monitor_diagnostic_categories" "key_vault" {
 locals {
   # Set the log categories.
   key_vault_log_categories = data.azurerm_monitor_diagnostic_categories.key_vault.log_category_types
+
+  # Set the metric categories.
+  key_vault_metric_categories = data.azurerm_monitor_diagnostic_categories.key_vault.metrics
 }
 
 # Create the default diagnostic setting, excluding the kube-audit logs.
@@ -95,6 +98,15 @@ resource "azurerm_monitor_diagnostic_setting" "key_vault_default" {
 
     content {
       category = enabled_log.key
+    }
+  }
+
+  dynamic "metric" {
+    for_each = local.key_vault_metric_categories
+
+    content {
+      category = metric.key
+      enabled  = false
     }
   }
 }

@@ -54,6 +54,9 @@ data "azurerm_monitor_diagnostic_categories" "kubernetes_cluster" {
 locals {
   # Set the log categories, excluding the kube-audit logs.
   kubernetes_cluster_log_categories = toset([for type in data.azurerm_monitor_diagnostic_categories.kubernetes_cluster.log_category_types : type if type != "kube-audit"])
+
+  # Set the metric categories.
+  kubernetes_cluster_metric_categories = data.azurerm_monitor_diagnostic_categories.kubernetes_cluster.metrics
 }
 
 # Create the default diagnostic setting, excluding the kube-audit logs.
@@ -70,6 +73,15 @@ resource "azurerm_monitor_diagnostic_setting" "kubernetes_cluster_default" {
       category = enabled_log.key
     }
   }
+
+  dynamic "metric" {
+    for_each = local.kubernetes_cluster_metric_categories
+
+    content {
+      category = metric.key
+      enabled  = false
+    }
+  }
 }
 
 # Create the kube-audit diagnostic setting.
@@ -84,6 +96,15 @@ resource "azurerm_monitor_diagnostic_setting" "kubernetes_cluster_kube_audit" {
     retention_policy {
       enabled = true
       days    = 30
+    }
+  }
+
+  dynamic "metric" {
+    for_each = local.kubernetes_cluster_metric_categories
+
+    content {
+      category = metric.key
+      enabled  = false
     }
   }
 }
