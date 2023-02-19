@@ -1,10 +1,10 @@
 # Create the Kubernetes cluster, including the default node pool.
 resource "azurerm_kubernetes_cluster" "default" {
-  name                   = "aks-${local.name_suffix}"
+  name                   = "aks-${local.suffix}"
   location               = var.location
   resource_group_name    = azurerm_resource_group.default.name
   node_resource_group    = "${azurerm_resource_group.default.name}-aks"
-  dns_prefix             = "aks-${local.name_suffix}"
+  dns_prefix             = "aks-${local.suffix}"
   sku_tier               = var.kubernetes_cluster_sku_tier
   azure_policy_enabled   = true
   disk_encryption_set_id = azurerm_disk_encryption_set.default.id

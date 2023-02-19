@@ -31,10 +31,13 @@ data "http" "public_ip" {
 
 locals {
   # Set the application name
-  app = "arceus"
+  app = "orion"
+
+  # Lookup and set the location abbreviation, defaults to na (not available).
+  location_abbreviation = try(var.location_abbreviation[var.location], "na")
 
   # Construct the name suffix.
-  name_suffix = "${local.app}-${var.environment}-${var.location}"
+  suffix = "${local.app}-${var.environment}-${local.location_abbreviation}"
 
   # Clean and set the public IP address
   public_ip = chomp(data.http.public_ip.response_body)
@@ -55,13 +58,13 @@ resource "random_id" "key_vault" {
 
 # Create the resource group.
 resource "azurerm_resource_group" "default" {
-  name     = "rg-${local.name_suffix}"
+  name     = "rg-${local.suffix}"
   location = var.location
 }
 
 # Create the Log Analytics workspace.
 resource "azurerm_log_analytics_workspace" "default" {
-  name                = "log-${local.name_suffix}"
+  name                = "log-${local.suffix}"
   location            = var.location
   resource_group_name = azurerm_resource_group.default.name
   retention_in_days   = 30
@@ -78,21 +81,21 @@ resource "azurerm_storage_account" "logs" {
 
 # Create the managed identity for the Kubernetes cluster.
 resource "azurerm_user_assigned_identity" "kubernetes_cluster" {
-  name                = "id-aks-${local.name_suffix}"
+  name                = "id-aks-${local.suffix}"
   location            = var.location
   resource_group_name = azurerm_resource_group.default.name
 }
 
 # Create the managed identity for the disk encyption set.
 resource "azurerm_user_assigned_identity" "disk_encryption_set" {
-  name                = "id-des-${local.name_suffix}"
+  name                = "id-des-${local.suffix}"
   location            = var.location
   resource_group_name = azurerm_resource_group.default.name
 }
 
 # Create the disk encryption set.
 resource "azurerm_disk_encryption_set" "default" {
-  name                      = "des-${local.name_suffix}"
+  name                      = "des-${local.suffix}"
   location                  = var.location
   resource_group_name       = azurerm_resource_group.default.name
   key_vault_key_id          = azurerm_key_vault_key.disk_encryption_set.id

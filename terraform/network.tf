@@ -1,6 +1,6 @@
 # Create the virtual network.
 resource "azurerm_virtual_network" "default" {
-  name                = "vnet-${local.name_suffix}"
+  name                = "vnet-${local.suffix}"
   location            = var.location
   resource_group_name = azurerm_resource_group.default.name
   address_space       = ["10.10.0.0/16"]
@@ -16,14 +16,14 @@ resource "azurerm_subnet" "aks" {
 
 # Create the network security group.
 resource "azurerm_network_security_group" "aks" {
-  name                = "nsg-vnet-aks"
+  name                = "nsg-vnet-aks-${local.suffix}"
   location            = var.location
   resource_group_name = azurerm_resource_group.default.name
 }
 
 # Create the route table.
 resource "azurerm_route_table" "aks" {
-  name                = "rt-vnet-aks"
+  name                = "rt-vnet-aks-${local.suffix}"
   location            = var.location
   resource_group_name = azurerm_resource_group.default.name
 }
