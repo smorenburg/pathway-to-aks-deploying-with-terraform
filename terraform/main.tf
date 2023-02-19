@@ -44,8 +44,13 @@ locals {
 }
 
 # Generate a random suffix for the logs storage account.
-resource "random_id" "logs" {
-  byte_length = 4
+resource "random_id" "storage_account" {
+  byte_length = 3
+}
+
+# Generate a random suffix for the key vault.
+resource "random_id" "key_vault" {
+  byte_length = 3
 }
 
 # Create the resource group.
@@ -64,7 +69,7 @@ resource "azurerm_log_analytics_workspace" "default" {
 
 # Create the storage account for the logs.
 resource "azurerm_storage_account" "logs" {
-  name                     = "st${local.app}${random_id.logs.hex}"
+  name                     = "st${local.app}${var.environment}${random_id.storage_account.hex}"
   location                 = var.location
   resource_group_name      = azurerm_resource_group.default.name
   account_tier             = "Standard"

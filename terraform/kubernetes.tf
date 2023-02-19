@@ -5,17 +5,18 @@ resource "azurerm_kubernetes_cluster" "default" {
   resource_group_name    = azurerm_resource_group.default.name
   node_resource_group    = "${azurerm_resource_group.default.name}-aks"
   dns_prefix             = "aks-${local.name_suffix}"
+  sku_tier               = var.kubernetes_cluster_sku_tier
   azure_policy_enabled   = true
   disk_encryption_set_id = azurerm_disk_encryption_set.default.id
 
   default_node_pool {
     name                = "default"
-    vm_size             = "Standard_D2s_v5"
+    vm_size             = var.kubernetes_cluster_vm_size
     vnet_subnet_id      = azurerm_subnet.aks.id
     zones               = ["1", "2", "3"]
     enable_auto_scaling = true
     min_count           = 3
-    max_count           = 6
+    max_count           = 9
 
     upgrade_settings {
       max_surge = "25%"
