@@ -86,7 +86,7 @@ locals {
   key_vault_metric_categories = data.azurerm_monitor_diagnostic_categories.key_vault.metrics
 }
 
-# Create the default diagnostic setting, excluding the kube-audit logs.
+# Create the default diagnostic setting.
 resource "azurerm_monitor_diagnostic_setting" "key_vault_default" {
   name                           = "default"
   target_resource_id             = azurerm_key_vault.default.id
