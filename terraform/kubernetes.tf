@@ -53,7 +53,10 @@ data "azurerm_monitor_diagnostic_categories" "kubernetes_cluster" {
 
 locals {
   # Set the log categories, excluding the kube-audit logs.
-  kubernetes_cluster_log_categories = toset([for type in data.azurerm_monitor_diagnostic_categories.kubernetes_cluster.log_category_types : type if type != "kube-audit"])
+  kubernetes_cluster_log_categories = toset([
+    for type in data.azurerm_monitor_diagnostic_categories.kubernetes_cluster.log_category_types : type
+    if type != "kube-audit"
+  ])
 
   # Set the metric categories.
   kubernetes_cluster_metric_categories = data.azurerm_monitor_diagnostic_categories.kubernetes_cluster.metrics
