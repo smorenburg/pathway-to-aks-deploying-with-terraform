@@ -86,7 +86,7 @@ resource "azurerm_user_assigned_identity" "kubernetes_cluster" {
   resource_group_name = azurerm_resource_group.default.name
 }
 
-# Create the managed identity for the disk encyption set.
+# Create the managed identity for the disk encryption set.
 resource "azurerm_user_assigned_identity" "disk_encryption_set" {
   name                = "id-des-${local.suffix}"
   location            = var.location
