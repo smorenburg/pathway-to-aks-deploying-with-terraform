@@ -32,6 +32,7 @@ resource "azurerm_key_vault_access_policy" "default" {
     "Create",
     "Delete",
     "Get",
+    "List",
     "Purge",
     "Update",
     "Sign"
