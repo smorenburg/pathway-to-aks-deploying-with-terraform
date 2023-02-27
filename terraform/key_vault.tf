@@ -1,3 +1,16 @@
+# Collect the diagnostic categories.
+data "azurerm_monitor_diagnostic_categories" "key_vault" {
+  resource_id = azurerm_key_vault.default.id
+}
+
+locals {
+  # Set the log categories.
+  key_vault_log_categories = data.azurerm_monitor_diagnostic_categories.key_vault.log_category_types
+
+  # Set the metric categories.
+  key_vault_metric_categories = data.azurerm_monitor_diagnostic_categories.key_vault.metrics
+}
+
 # Create the key vault.
 resource "azurerm_key_vault" "default" {
   name                       = "kv-${local.app}-${var.environment}-${random_id.key_vault.hex}"
@@ -20,10 +33,7 @@ resource "azurerm_key_vault_access_policy" "default" {
     "Delete",
     "Get",
     "Purge",
-    "Recover",
     "Update",
-    "List",
-    "Decrypt",
     "Sign"
   ]
 }
@@ -61,19 +71,6 @@ resource "azurerm_key_vault_key" "disk_encryption_set" {
     azurerm_key_vault_access_policy.disk_encryption_set,
     azurerm_key_vault_access_policy.default
   ]
-}
-
-# Collect the diagnostic categories.
-data "azurerm_monitor_diagnostic_categories" "key_vault" {
-  resource_id = azurerm_key_vault.default.id
-}
-
-locals {
-  # Set the log categories.
-  key_vault_log_categories = data.azurerm_monitor_diagnostic_categories.key_vault.log_category_types
-
-  # Set the metric categories.
-  key_vault_metric_categories = data.azurerm_monitor_diagnostic_categories.key_vault.metrics
 }
 
 # Create the default diagnostic setting.
